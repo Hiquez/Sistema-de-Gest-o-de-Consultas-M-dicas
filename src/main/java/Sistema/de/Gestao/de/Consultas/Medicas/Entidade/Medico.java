@@ -1,5 +1,6 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Entidade;
 
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.Enum.Especialidade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
