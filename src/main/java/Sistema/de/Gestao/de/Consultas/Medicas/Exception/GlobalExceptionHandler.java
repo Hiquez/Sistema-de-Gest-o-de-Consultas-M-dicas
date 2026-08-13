@@ -1,6 +1,10 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Exception;
 
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ErroResponse;
+import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.ConsultaException;
+import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.HorarioException;
+import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.MedicoException;
+import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.PacienteException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +65,62 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
+                .body(error);
+    }
+
+    @ExceptionHandler(ConsultaException.class)
+    public ResponseEntity<ErroResponse> handleConsultaException(
+            ConsultaException ex) {
+
+        ErroResponse error = new ErroResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(PacienteException.class)
+    public ResponseEntity<ErroResponse> handlePacienteException(
+            PacienteException ex) {
+        ErroResponse error = new ErroResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(MedicoException.class)
+    public ResponseEntity<ErroResponse> handleMedicoException(
+            MedicoException ex){
+                ErroResponse error = new ErroResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                );
+
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(error);
+    }
+
+    @ExceptionHandler(HorarioException.class)
+    public ResponseEntity<ErroResponse> handleHorarioException(
+            HorarioException ex){
+        ErroResponse error = new ErroResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
 }
