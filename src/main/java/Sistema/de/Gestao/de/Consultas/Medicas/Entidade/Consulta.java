@@ -1,5 +1,6 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Entidade;
 
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.Enum.StatusConsulta;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import lombok.AllArgsConstructor;
