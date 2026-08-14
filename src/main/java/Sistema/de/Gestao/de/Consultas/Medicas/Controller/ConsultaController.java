@@ -1,7 +1,7 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Controller;
 
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaRequestDTO;
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaResponseDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaRequestDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaResponseDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Service.ConsultaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

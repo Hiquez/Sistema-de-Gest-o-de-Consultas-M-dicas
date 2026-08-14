@@ -1,7 +1,7 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Service;
 
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaRequestDTO;
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaResponseDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaRequestDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaResponseDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.Enum.StatusConsulta;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Consulta;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Medico;

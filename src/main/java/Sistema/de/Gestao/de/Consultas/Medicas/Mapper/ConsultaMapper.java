@@ -1,7 +1,6 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Mapper;
 
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaRequestDTO;
-import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ConsultaResponseDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaResponseDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Consulta;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

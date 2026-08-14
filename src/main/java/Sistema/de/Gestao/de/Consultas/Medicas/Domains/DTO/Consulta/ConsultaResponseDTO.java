@@ -1,4 +1,4 @@
-package Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO;
+package Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta;
 
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.Enum.StatusConsulta;
 import java.time.LocalDateTime;
