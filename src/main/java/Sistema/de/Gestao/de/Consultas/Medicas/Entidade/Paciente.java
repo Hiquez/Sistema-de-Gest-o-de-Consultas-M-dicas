@@ -3,34 +3,50 @@ package Sistema.de.Gestao.de.Consultas.Medicas.Entidade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
-@Table(name = "paciente")
+@Table(name = "paciente", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_paciente_cpf", columnNames = "cpf")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Paciente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idPaciente;
-    @NotBlank(message = "O nome do paciente não pode ser vazio")
-    @Size(max = 100, message = "O nome do paciente não pode ter mais de 100 caracteres")
-    @Min(value = 3, message = "O nome do paciente deve ter pelo menos 3 caracteres")
+    private Long id;
+
+    @Column(nullable = false, length = 150)
+    @NotBlank(message = "Nome é obrigatório")
     private String nome;
-    @NotBlank(message = "O CPF do paciente não pode ser vazio")
-    @Size(min = 11, max = 11, message = "O CPF do paciente deve ter exatamente 11 caracteres")
-    @Column(unique = true)
+
+    @Column(nullable = false, length = 11)
+    @NotBlank(message = "CPF é obrigatório")
+    @Pattern(regexp = "\\d{11}", message = "CPF deve conter 11 dígitos numéricos")
     private String cpf;
-    @Past(message = "A data de nascimento deve ser uma data passada")
+
+    @Column(name = "data_nascimento", nullable = false)
+    @Past(message = "Data de nascimento deve estar no passado")
     private LocalDate dataNascimento;
+
+    @Column(length = 20)
     private String telefone;
-    @Email(message = "O email do paciente deve ser um email válido")
+
+    @Column(length = 150)
+    @Email(message = "E-mail inválido")
     private String email;
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Consulta> consultas;
+
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = false)
+    @Builder.Default
+    private List<Consulta> consultas = new ArrayList<>();
 }
