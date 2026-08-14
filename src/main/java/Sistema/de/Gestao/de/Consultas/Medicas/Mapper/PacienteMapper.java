@@ -4,9 +4,7 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Paciente.PacienteReque
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Paciente.PacienteResponseDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Paciente;
 
-public class PacienteMapper {
-
-    private PacienteMapper() {}
+public interface PacienteMapper {
 
     public static Paciente toEntity(PacienteRequestDTO dto) {
         return Paciente.builder()

@@ -1,10 +1,7 @@
 package Sistema.de.Gestao.de.Consultas.Medicas.Exception;
 
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.ErroResponse;
-import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.ConsultaException;
-import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.HorarioException;
-import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.MedicoException;
-import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.PacienteException;
+import Sistema.de.Gestao.de.Consultas.Medicas.Exception.Exceptions.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +113,32 @@ public class GlobalExceptionHandler {
             HorarioException ex){
         ErroResponse error = new ErroResponse(
                 HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(PacienteNaoLocalizadoException.class)
+    public ResponseEntity<ErroResponse> handlePacienteNaoLocalizadoException(
+            PacienteNaoLocalizadoException ex){
+        ErroResponse error = new ErroResponse(
+                (HttpStatus.BAD_REQUEST.value()),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(CpfDuplicadoException.class)
+    public ResponseEntity<ErroResponse> handleCpfDuplicadoException(
+            CpfDuplicadoException ex){
+        ErroResponse error = new ErroResponse(
+                (HttpStatus.BAD_REQUEST.value()),
                 ex.getMessage(),
                 LocalDateTime.now()
         );

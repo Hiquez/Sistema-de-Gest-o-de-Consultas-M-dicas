@@ -15,6 +15,7 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Repository.ConsultaRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.MedicoRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.PacienteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class ConsultaService {
     private final MedicoRepository medicoRepository;
     private final ConsultaMapper  consultaMapper;
 
+
     public ConsultaService(ConsultaRepository consultaRepository, PacienteRepository pacienteRepository, MedicoRepository medicoRepository, ConsultaMapper consultaMapper) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
@@ -33,11 +35,13 @@ public class ConsultaService {
         this.consultaMapper = consultaMapper;
     }
 
+    @Transactional
     public ConsultaResponseDTO agendarConsulta(ConsultaRequestDTO consultaRequestDTO) {
         Consulta consulta = validarAgendamentoConsulta(consultaRequestDTO);
         return consultaMapper.toResponse(consulta);
     }
 
+    @Transactional
     public ConsultaResponseDTO confirmarConsulta(Long IdConsulta) {
         Consulta consulta = consultaRepository.findById(IdConsulta).get();
         if (consulta.getStatus() != StatusConsulta.AGENDADA) {
@@ -48,6 +52,7 @@ public class ConsultaService {
         return consultaMapper.toResponse(consulta);
     }
 
+    @Transactional
     public ConsultaResponseDTO cancelarConsulta(Long IdConsulta) {
         Optional<Consulta> consulta = Optional.of(consultaRepository.findById(IdConsulta)
                 .orElseThrow(() -> new ConsultaException("Consulta não encontrada")));
@@ -62,6 +67,7 @@ public class ConsultaService {
         return consultaMapper.toResponse(consulta.get());
     }
 
+    @Transactional
     public ConsultaResponseDTO iniciarAtendimento(Long idConsulta) {
         Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
         if (consulta.get().getStatus() == StatusConsulta.CONFIRMADA) {
@@ -73,6 +79,7 @@ public class ConsultaService {
         return consultaMapper.toResponse(consulta.get());
     }
 
+    @Transactional
     public ConsultaResponseDTO concluirConsulta(Long idConsulta) {
         Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
         if (consulta.get().getStatus() == StatusConsulta.EM_ATENDIMENTO) {
@@ -84,6 +91,7 @@ public class ConsultaService {
         return consultaMapper.toResponse(consulta.get());
     }
 
+    @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaPorId(Long idConsulta) {
         Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
         if (consulta.isPresent()) {
@@ -93,10 +101,12 @@ public class ConsultaService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorPaciente(Long idPaciente) {
         return consultaRepository.listarConsultasPorPaciente(idPaciente);
     }
 
+    @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorMedico(Long idMedico) {
         return consultaRepository.listarConsultasPorMedico(idMedico);
     }
