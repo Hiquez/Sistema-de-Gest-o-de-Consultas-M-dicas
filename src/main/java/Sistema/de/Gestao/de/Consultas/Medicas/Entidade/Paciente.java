@@ -49,4 +49,6 @@ public class Paciente {
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = false)
     @Builder.Default
     private List<Consulta> consultas = new ArrayList<>();
+
+    private Boolean status = true;
 }

@@ -48,7 +48,6 @@ public class ConsultaService {
             throw new ConsultaException("Consulta não pode ser confirmada");
         }
         consulta.setStatus(StatusConsulta.CONFIRMADA);
-        consultaRepository.save(consulta);
         return consultaMapper.toResponse(consulta);
     }
 
@@ -63,7 +62,6 @@ public class ConsultaService {
         }
 
         consulta.get().setStatus(StatusConsulta.CANCELADA);
-        consultaRepository.save(consulta.get());
         return consultaMapper.toResponse(consulta.get());
     }
 
@@ -75,7 +73,6 @@ public class ConsultaService {
         }
 
         consulta.get().setStatus(StatusConsulta.EM_ATENDIMENTO);
-        consultaRepository.save(consulta.get());
         return consultaMapper.toResponse(consulta.get());
     }
 
@@ -87,7 +84,6 @@ public class ConsultaService {
         }
 
         consulta.get().setStatus(StatusConsulta.CONCLUIDA);
-        consultaRepository.save(consulta.get());
         return consultaMapper.toResponse(consulta.get());
     }
 

@@ -59,9 +59,17 @@ public class PacienteService {
     }
 
     @Transactional
-    public void excluir(Long id) {
-        Paciente paciente = buscarEntidadePorId(id);
-        pacienteRepository.delete(paciente);
+    public PacienteResponseDTO ativarPaciente(Long idPaciente){
+        Paciente paciente = buscarEntidadePorId(idPaciente);
+        paciente.setStatus(true);
+        return PacienteMapper.toResponseDTO(paciente);
+    }
+
+    @Transactional
+    public PacienteResponseDTO inativarPaciente(Long idPaciente){
+        Paciente paciente = buscarEntidadePorId(idPaciente);
+        paciente.setStatus(false);
+        return PacienteMapper.toResponseDTO(paciente);
     }
 
     private Paciente buscarEntidadePorId(Long id) {
