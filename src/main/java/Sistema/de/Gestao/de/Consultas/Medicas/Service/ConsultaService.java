@@ -17,7 +17,6 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Repository.PacienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ConsultaService {
@@ -25,10 +24,12 @@ public class ConsultaService {
     private final ConsultaRepository consultaRepository;
     private final PacienteRepository pacienteRepository;
     private final MedicoRepository medicoRepository;
-    private final ConsultaMapper  consultaMapper;
+    private final ConsultaMapper consultaMapper;
 
-
-    public ConsultaService(ConsultaRepository consultaRepository, PacienteRepository pacienteRepository, MedicoRepository medicoRepository, ConsultaMapper consultaMapper) {
+    public ConsultaService(ConsultaRepository consultaRepository,
+                           PacienteRepository pacienteRepository,
+                           MedicoRepository medicoRepository,
+                           ConsultaMapper consultaMapper) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
         this.medicoRepository = medicoRepository;
@@ -42,59 +43,60 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponseDTO confirmarConsulta(Long IdConsulta) {
-        Consulta consulta = consultaRepository.findById(IdConsulta).get();
+    public ConsultaResponseDTO confirmarConsulta(Long idConsulta) {
+        Consulta consulta = buscarEntidadePorId(idConsulta);
+
         if (consulta.getStatus() != StatusConsulta.AGENDADA) {
             throw new ConsultaException("Consulta não pode ser confirmada");
         }
+
         consulta.setStatus(StatusConsulta.CONFIRMADA);
         return consultaMapper.toResponse(consulta);
     }
 
     @Transactional
-    public ConsultaResponseDTO cancelarConsulta(Long IdConsulta) {
-        Optional<Consulta> consulta = Optional.of(consultaRepository.findById(IdConsulta)
-                .orElseThrow(() -> new ConsultaException("Consulta não encontrada")));
+    public ConsultaResponseDTO cancelarConsulta(Long idConsulta) {
+        Consulta consulta = buscarEntidadePorId(idConsulta);
 
-        boolean podeCancelar = consulta.get().getStatus() == StatusConsulta.CONFIRMADA || consulta.get().getStatus() == StatusConsulta.AGENDADA;
+        boolean podeCancelar = consulta.getStatus() == StatusConsulta.CONFIRMADA
+                || consulta.getStatus() == StatusConsulta.AGENDADA;
+
         if (!podeCancelar) {
             throw new ConsultaException("Consulta não pode ser cancelada");
         }
 
-        consulta.get().setStatus(StatusConsulta.CANCELADA);
-        return consultaMapper.toResponse(consulta.get());
+        consulta.setStatus(StatusConsulta.CANCELADA);
+        return consultaMapper.toResponse(consulta);
     }
 
     @Transactional
     public ConsultaResponseDTO iniciarAtendimento(Long idConsulta) {
-        Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
-        if (consulta.get().getStatus() == StatusConsulta.CONFIRMADA) {
+        Consulta consulta = buscarEntidadePorId(idConsulta);
+
+        if (consulta.getStatus() != StatusConsulta.CONFIRMADA) {
             throw new ConsultaException("Consulta não pode ser iniciada");
         }
 
-        consulta.get().setStatus(StatusConsulta.EM_ATENDIMENTO);
-        return consultaMapper.toResponse(consulta.get());
+        consulta.setStatus(StatusConsulta.EM_ATENDIMENTO);
+        return consultaMapper.toResponse(consulta);
     }
 
     @Transactional
     public ConsultaResponseDTO concluirConsulta(Long idConsulta) {
-        Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
-        if (consulta.get().getStatus() == StatusConsulta.EM_ATENDIMENTO) {
+        Consulta consulta = buscarEntidadePorId(idConsulta);
+
+        // Só pode concluir se a consulta estiver em atendimento
+        if (consulta.getStatus() != StatusConsulta.EM_ATENDIMENTO) {
             throw new ConsultaException("Consulta não pode ser concluída");
         }
 
-        consulta.get().setStatus(StatusConsulta.CONCLUIDA);
-        return consultaMapper.toResponse(consulta.get());
+        consulta.setStatus(StatusConsulta.CONCLUIDA);
+        return consultaMapper.toResponse(consulta);
     }
 
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaPorId(Long idConsulta) {
-        Optional<Consulta> consulta = consultaRepository.findById(idConsulta);
-        if (consulta.isPresent()) {
-            return consultaMapper.toResponse(consulta.get());
-        } else {
-            throw new ConsultaException("Consulta não encontrada");
-        }
+        return consultaMapper.toResponse(buscarEntidadePorId(idConsulta));
     }
 
     @Transactional(readOnly = true)
@@ -107,15 +109,14 @@ public class ConsultaService {
         return consultaRepository.listarConsultasPorMedico(idMedico);
     }
 
-
-    private Consulta validarAgendamentoConsulta(ConsultaRequestDTO  consultaRequestDTO) {
+    private Consulta validarAgendamentoConsulta(ConsultaRequestDTO consultaRequestDTO) {
         Paciente pacienteExiste = pacienteRepository.findById(consultaRequestDTO.idPaciente())
                 .orElseThrow(() -> new PacienteException("Paciente não encontrado"));
 
         Medico medicoExiste = medicoRepository.findById(consultaRequestDTO.idMedico())
                 .orElseThrow(() -> new MedicoException("Médico não encontrado"));
 
-        if(consultaRepository.existsByMedicoAndDataHora(medicoExiste, consultaRequestDTO.dataHora())) {
+        if (consultaRepository.existsByMedicoAndDataHora(medicoExiste, consultaRequestDTO.dataHora())) {
             throw new HorarioException("Horário não disponível");
         }
 
@@ -129,7 +130,12 @@ public class ConsultaService {
         consulta.setDataHora(consultaRequestDTO.dataHora());
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setObservacao(consultaRequestDTO.observacao());
-        consultaRepository.save(consulta);
-        return consulta;
+
+        return consultaRepository.save(consulta);
+    }
+
+    private Consulta buscarEntidadePorId(Long idConsulta) {
+        return consultaRepository.findById(idConsulta)
+                .orElseThrow(() -> new ConsultaException("Consulta não encontrada"));
     }
 }

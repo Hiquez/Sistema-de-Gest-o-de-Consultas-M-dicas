@@ -19,11 +19,11 @@ public class Consulta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idConsulta;
-    @ManyToMany
-    @JoinColumn
+    @ManyToOne
+    @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;
-    @ManyToMany
-    @JoinColumn
+    @ManyToOne
+    @JoinColumn(name = "id_medico", nullable = false)
     private Medico medico;
     @Future(message = "A data e hora da consulta deve ser uma data futura")
     private LocalDateTime dataHora;

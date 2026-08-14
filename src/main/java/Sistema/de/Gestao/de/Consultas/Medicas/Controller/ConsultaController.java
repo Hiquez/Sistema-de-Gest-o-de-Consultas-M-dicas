@@ -7,11 +7,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/consulta")
+@RequestMapping("/consultas")
 public class ConsultaController {
 
     private final ConsultaService consultaService;
@@ -20,33 +19,47 @@ public class ConsultaController {
         this.consultaService = consultaService;
     }
 
-    @PostMapping("/agendar")
-    public ResponseEntity<ConsultaResponseDTO> agendarConsulta(@RequestBody @Valid ConsultaRequestDTO consultaRequestDTO){
-        return ResponseEntity.status(HttpStatus.CREATED).body(consultaService.agendarConsulta(consultaRequestDTO));
+    @PostMapping
+    public ResponseEntity<ConsultaResponseDTO> agendar(@RequestBody @Valid ConsultaRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(consultaService.agendarConsulta(dto));
     }
 
-    @GetMapping("/buscar/consulta/{idConsulta}")
-    public ResponseEntity<ConsultaResponseDTO> buscarConsultaId(@PathVariable Long idConsulta){
-        return ResponseEntity.status(HttpStatus.OK).body(consultaService.buscarConsultaPorId(idConsulta));
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(consultaService.buscarConsultaPorId(id));
     }
 
-    @GetMapping("/listar/consultas/paciente/{idPaciente}")
-    public ResponseEntity<List<ConsultaResponseDTO>> listarConsultaPorPaciente(@PathVariable Long idPaciente){
-        return ResponseEntity.status(HttpStatus.OK).body(consultaService.listarConsultaPorPaciente(idPaciente));
+    @GetMapping
+    public ResponseEntity<List<ConsultaResponseDTO>> listar(
+            @RequestParam(required = false) Long pacienteId,
+            @RequestParam(required = false) Long medicoId) {
+
+        if (pacienteId != null) {
+            return ResponseEntity.ok(consultaService.listarConsultaPorPaciente(pacienteId));
+        }
+        if (medicoId != null) {
+            return ResponseEntity.ok(consultaService.listarConsultaPorMedico(medicoId));
+        }
+        throw new IllegalArgumentException("Informe pacienteId ou medicoId para listar as consultas");
     }
 
-    @PatchMapping("/confirmar/{idConsulta}")
-    public ResponseEntity<ConsultaResponseDTO> confirmarConsulta(@PathVariable Long idConsulta) {
-        return ResponseEntity.status(HttpStatus.OK).body(consultaService.confirmarConsulta(idConsulta));
+    @PatchMapping("/{id}/confirmar")
+    public ResponseEntity<ConsultaResponseDTO> confirmar(@PathVariable Long id) {
+        return ResponseEntity.ok(consultaService.confirmarConsulta(id));
     }
 
-    @PatchMapping("/cancelar/{idConsulta}")
-    public ResponseEntity<ConsultaResponseDTO> cancelarConsulta(@PathVariable Long idConsulta) {
-        return ResponseEntity.status(HttpStatus.OK).body(consultaService.cancelarConsulta(idConsulta));
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<ConsultaResponseDTO> cancelar(@PathVariable Long id) {
+        return ResponseEntity.ok(consultaService.cancelarConsulta(id));
     }
 
-    @PatchMapping("/concluir/{idConsulta}")
-    public ResponseEntity<ConsultaResponseDTO> concluirConsulta(@PathVariable Long idConsulta) {
-        return ResponseEntity.status(HttpStatus.OK).body(consultaService.concluirConsulta(idConsulta));
+    @PatchMapping("/{id}/iniciar")
+    public ResponseEntity<ConsultaResponseDTO> iniciarAtendimento(@PathVariable Long id) {
+        return ResponseEntity.ok(consultaService.iniciarAtendimento(id));
+    }
+
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<ConsultaResponseDTO> concluir(@PathVariable Long id) {
+        return ResponseEntity.ok(consultaService.concluirConsulta(id));
     }
 }
