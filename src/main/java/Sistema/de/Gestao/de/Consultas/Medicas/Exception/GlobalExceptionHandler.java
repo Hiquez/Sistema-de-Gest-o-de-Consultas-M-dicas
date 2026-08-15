@@ -146,4 +146,31 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
+
+    @ExceptionHandler(CRMDuplicadoException.class)
+    public ResponseEntity<ErroResponse> handleCRMDuplicadoException(
+            CRMDuplicadoException ex){
+        ErroResponse error = new ErroResponse(
+                (HttpStatus.BAD_REQUEST.value()),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(MedicoNaoEncontradoException.class)
+    public ResponseEntity<ErroResponse> handleMedicoNaoEncontradoException(
+            MedicoNaoEncontradoException ex){
+        ErroResponse error = new ErroResponse(
+                (HttpStatus.NOT_FOUND.value()),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
 }
+
