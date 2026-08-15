@@ -26,7 +26,7 @@ public interface PacienteMapper {
 
     public static PacienteResponseDTO toResponseDTO(Paciente paciente) {
         return new PacienteResponseDTO(
-                paciente.getId(),
+                paciente.getIdPaciente(),
                 paciente.getNome(),
                 paciente.getCpf(),
                 paciente.getDataNascimento(),

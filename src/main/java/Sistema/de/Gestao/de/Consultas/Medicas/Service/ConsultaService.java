@@ -101,12 +101,12 @@ public class ConsultaService {
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorPaciente(Long idPaciente) {
-        return consultaRepository.listarConsultasPorPaciente(idPaciente);
+        return consultaRepository.findByPaciente_IdPaciente(idPaciente);
     }
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorMedico(Long idMedico) {
-        return consultaRepository.listarConsultasPorMedico(idMedico);
+        return consultaRepository.findByMedico_IdMedico(idMedico);
     }
 
     private Consulta validarAgendamentoConsulta(ConsultaRequestDTO consultaRequestDTO) {

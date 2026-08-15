@@ -24,7 +24,7 @@ public class Paciente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPaciente;
 
     @Column(nullable = false, length = 150)
     @NotBlank(message = "Nome é obrigatório")

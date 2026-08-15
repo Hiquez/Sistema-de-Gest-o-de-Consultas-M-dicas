@@ -10,7 +10,7 @@ import java.util.List;
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     boolean existsByMedicoAndDataHora(Medico medicoExiste, LocalDateTime localDateTime);
 
-    List<ConsultaResponseDTO> listarConsultasPorPaciente(Long idPaciente);
+    List<ConsultaResponseDTO> findByPaciente_IdPaciente(Long idPaciente);
 
-    List<ConsultaResponseDTO> listarConsultasPorMedico(Long idMedico);
+    List<ConsultaResponseDTO> findByMedico_IdMedico(Long idMedico);
 }
