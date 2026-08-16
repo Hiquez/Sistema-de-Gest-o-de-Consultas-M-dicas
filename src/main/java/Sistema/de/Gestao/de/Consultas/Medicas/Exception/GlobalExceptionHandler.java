@@ -172,5 +172,18 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(error);
     }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<ErroResponse> handleEmailException(
+            EmailException ex){
+        ErroResponse error = new ErroResponse(
+                (HttpStatus.BAD_REQUEST.value()),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
 }
 

@@ -2,6 +2,10 @@ package Sistema.de.Gestao.de.Consultas.Medicas.Service;
 
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaRequestDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.ConsultaResponseDTO;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaAgendadaEvent;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaCanceladaEvent;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaConcluidaEvent;
+import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaConfirmadaEvent;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.Enum.StatusConsulta;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Consulta;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Medico;
@@ -14,6 +18,7 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Mapper.ConsultaMapper;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.ConsultaRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.MedicoRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.PacienteRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -25,20 +30,34 @@ public class ConsultaService {
     private final PacienteRepository pacienteRepository;
     private final MedicoRepository medicoRepository;
     private final ConsultaMapper consultaMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ConsultaService(ConsultaRepository consultaRepository,
                            PacienteRepository pacienteRepository,
                            MedicoRepository medicoRepository,
-                           ConsultaMapper consultaMapper) {
+                           ConsultaMapper consultaMapper,
+                           ApplicationEventPublisher applicationEventPublisher) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
         this.medicoRepository = medicoRepository;
         this.consultaMapper = consultaMapper;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
     public ConsultaResponseDTO agendarConsulta(ConsultaRequestDTO consultaRequestDTO) {
         Consulta consulta = validarAgendamentoConsulta(consultaRequestDTO);
+
+        applicationEventPublisher.publishEvent(
+                new ConsultaAgendadaEvent(
+                        consulta.getIdConsulta(),
+                        consulta.getPaciente().getNome(),
+                        consulta.getPaciente().getEmail(),
+                        consulta.getMedico().getNome(),
+                        consulta.getDataHora()
+                )
+        );
+
         return consultaMapper.toResponse(consulta);
     }
 
@@ -51,6 +70,17 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.CONFIRMADA);
+
+        applicationEventPublisher.publishEvent(
+                new ConsultaConfirmadaEvent(
+                        consulta.getIdConsulta(),
+                        consulta.getPaciente().getNome(),
+                        consulta.getPaciente().getEmail(),
+                        consulta.getMedico().getNome(),
+                        consulta.getDataHora()
+                )
+        );
+
         return consultaMapper.toResponse(consulta);
     }
 
@@ -66,6 +96,17 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.CANCELADA);
+
+        applicationEventPublisher.publishEvent(
+                new ConsultaCanceladaEvent(
+                        consulta.getIdConsulta(),
+                        consulta.getPaciente().getNome(),
+                        consulta.getPaciente().getEmail(),
+                        consulta.getMedico().getNome(),
+                        consulta.getDataHora()
+                )
+        );
+
         return consultaMapper.toResponse(consulta);
     }
 
@@ -91,6 +132,17 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.CONCLUIDA);
+
+        applicationEventPublisher.publishEvent(
+                new ConsultaConcluidaEvent(
+                        consulta.getIdConsulta(),
+                        consulta.getPaciente().getNome(),
+                        consulta.getPaciente().getEmail(),
+                        consulta.getMedico().getNome(),
+                        consulta.getDataHora()
+                )
+        );
+
         return consultaMapper.toResponse(consulta);
     }
 
