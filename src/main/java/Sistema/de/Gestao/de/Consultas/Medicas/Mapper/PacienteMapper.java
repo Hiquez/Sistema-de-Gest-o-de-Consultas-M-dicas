@@ -3,35 +3,18 @@ package Sistema.de.Gestao.de.Consultas.Medicas.Mapper;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Paciente.PacienteRequestDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Paciente.PacienteResponseDTO;
 import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Paciente;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
+@Mapper(componentModel = "spring")
 public interface PacienteMapper {
 
-    public static Paciente toEntity(PacienteRequestDTO dto) {
-        return Paciente.builder()
-                .nome(dto.nome())
-                .cpf(dto.cpf())
-                .dataNascimento(dto.dataNascimento())
-                .telefone(dto.telefone())
-                .email(dto.email())
-                .build();
-    }
+    Paciente toEntity(PacienteRequestDTO dto);
 
-    public static void updateEntityFromDto(PacienteRequestDTO dto, Paciente paciente) {
-        paciente.setNome(dto.nome());
-        paciente.setCpf(dto.cpf());
-        paciente.setDataNascimento(dto.dataNascimento());
-        paciente.setTelefone(dto.telefone());
-        paciente.setEmail(dto.email());
-    }
+    PacienteResponseDTO toResponseDTO(Paciente paciente);
 
-    public static PacienteResponseDTO toResponseDTO(Paciente paciente) {
-        return new PacienteResponseDTO(
-                paciente.getIdPaciente(),
-                paciente.getNome(),
-                paciente.getCpf(),
-                paciente.getDataNascimento(),
-                paciente.getTelefone(),
-                paciente.getEmail()
-        );
-    }
+    void updateEntityFromDto(
+            PacienteRequestDTO dto,
+            @MappingTarget Paciente paciente
+    );
 }
