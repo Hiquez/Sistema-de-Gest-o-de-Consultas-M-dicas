@@ -15,9 +15,11 @@ import java.util.List;
 public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
+    private final PacienteMapper pacienteMapper;
 
-    public PacienteService(PacienteRepository pacienteRepository) {
+    public PacienteService(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper) {
         this.pacienteRepository = pacienteRepository;
+        this.pacienteMapper = pacienteMapper;
     }
 
     @Transactional
@@ -26,23 +28,23 @@ public class PacienteService {
             throw new CpfDuplicadoException("Já existe paciente cadastrado com este CPF");
         }
 
-        Paciente paciente = PacienteMapper.toEntity(dto);
+        Paciente paciente = pacienteMapper.toEntity(dto);
         Paciente salvo = pacienteRepository.save(paciente);
 
-        return PacienteMapper.toResponseDTO(salvo);
+        return pacienteMapper.toResponseDTO(salvo);
     }
 
     @Transactional(readOnly = true)
     public PacienteResponseDTO buscarPorId(Long id) {
         Paciente paciente = buscarEntidadePorId(id);
-        return PacienteMapper.toResponseDTO(paciente);
+        return pacienteMapper.toResponseDTO(paciente);
     }
 
     @Transactional(readOnly = true)
     public List<PacienteResponseDTO> listarTodos() {
         return pacienteRepository.findAll()
                 .stream()
-                .map(PacienteMapper::toResponseDTO)
+                .map(pacienteMapper::toResponseDTO)
                 .toList();
     }
 
@@ -54,22 +56,22 @@ public class PacienteService {
             throw new CpfDuplicadoException("Já existe paciente cadastrado com este CPF");
         }
 
-        PacienteMapper.updateEntityFromDto(dto, paciente);
-        return PacienteMapper.toResponseDTO(paciente);
+        pacienteMapper.updateEntityFromDto(dto, paciente);
+        return pacienteMapper.toResponseDTO(paciente);
     }
 
     @Transactional
     public PacienteResponseDTO ativarPaciente(Long idPaciente){
         Paciente paciente = buscarEntidadePorId(idPaciente);
         paciente.setStatus(true);
-        return PacienteMapper.toResponseDTO(paciente);
+        return pacienteMapper.toResponseDTO(paciente);
     }
 
     @Transactional
     public PacienteResponseDTO inativarPaciente(Long idPaciente){
         Paciente paciente = buscarEntidadePorId(idPaciente);
         paciente.setStatus(false);
-        return PacienteMapper.toResponseDTO(paciente);
+        return pacienteMapper.toResponseDTO(paciente);
     }
 
     private Paciente buscarEntidadePorId(Long id) {
