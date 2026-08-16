@@ -45,21 +45,43 @@ public class ConsultaTest {
     @InjectMocks
     private ConsultaService consultaService;
 
+    // Helpers: os testes que disparam evento de domínio (agendar, confirmar,
+    // cancelar, concluir) precisam de paciente/médico com nome preenchido,
+    // porque o ConsultaService lê consulta.getPaciente().getNome() ao montar o evento
+    private Paciente criarPacienteValido() {
+        Paciente paciente = new Paciente();
+        paciente.setNome("Maria Silva");
+        paciente.setEmail("maria@email.com");
+        return paciente;
+    }
+
+    private Medico criarMedicoValido() {
+        Medico medico = new Medico();
+        medico.setNome("Dr. João Souza");
+        return medico;
+    }
+
 
     @Test
     public void testarAgendamentoConsulta() {
 
         ConsultaRequestDTO consultaRequest = mock(ConsultaRequestDTO.class);
 
-        Paciente paciente = new Paciente();
-        Medico medico = new Medico();
-        Consulta consultaSalva = new Consulta();
-
-        ConsultaResponseDTO consultaResponse =
-                mock(ConsultaResponseDTO.class);
+        Paciente paciente = criarPacienteValido();
+        Medico medico = criarMedicoValido();
 
         LocalDateTime dataHora =
                 LocalDateTime.of(2026, 8, 20, 14, 0);
+
+        // consultaSalva é o objeto que o ConsultaService realmente usa para
+        // montar o evento (é o retorno do save()) — precisa ter paciente/medico
+        Consulta consultaSalva = new Consulta();
+        consultaSalva.setPaciente(paciente);
+        consultaSalva.setMedico(medico);
+        consultaSalva.setDataHora(dataHora);
+
+        ConsultaResponseDTO consultaResponse =
+                mock(ConsultaResponseDTO.class);
 
         when(consultaRequest.idPaciente())
                 .thenReturn(1L);
@@ -209,6 +231,8 @@ public class ConsultaTest {
 
         Consulta consulta = new Consulta();
         consulta.setStatus(StatusConsulta.AGENDADA);
+        consulta.setPaciente(criarPacienteValido());
+        consulta.setMedico(criarMedicoValido());
 
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
@@ -260,6 +284,8 @@ public class ConsultaTest {
 
         Consulta consulta = new Consulta();
         consulta.setStatus(StatusConsulta.AGENDADA);
+        consulta.setPaciente(criarPacienteValido());
+        consulta.setMedico(criarMedicoValido());
 
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
@@ -290,6 +316,8 @@ public class ConsultaTest {
 
         Consulta consulta = new Consulta();
         consulta.setStatus(StatusConsulta.CONFIRMADA);
+        consulta.setPaciente(criarPacienteValido());
+        consulta.setMedico(criarMedicoValido());
 
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
@@ -391,6 +419,8 @@ public class ConsultaTest {
 
         Consulta consulta = new Consulta();
         consulta.setStatus(StatusConsulta.EM_ATENDIMENTO);
+        consulta.setPaciente(criarPacienteValido());
+        consulta.setMedico(criarMedicoValido());
 
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
