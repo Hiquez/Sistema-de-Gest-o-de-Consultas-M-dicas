@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -45,9 +47,9 @@ public class ConsultaTest {
     @InjectMocks
     private ConsultaService consultaService;
 
-    // Helpers: os testes que disparam evento de domínio (agendar, confirmar,
-    // cancelar, concluir) precisam de paciente/médico com nome preenchido,
-    // porque o ConsultaService lê consulta.getPaciente().getNome() ao montar o evento
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
     private Paciente criarPacienteValido() {
         Paciente paciente = new Paciente();
         paciente.setNome("Maria Silva");
@@ -73,8 +75,6 @@ public class ConsultaTest {
         LocalDateTime dataHora =
                 LocalDateTime.of(2026, 8, 20, 14, 0);
 
-        // consultaSalva é o objeto que o ConsultaService realmente usa para
-        // montar o evento (é o retorno do save()) — precisa ter paciente/medico
         Consulta consultaSalva = new Consulta();
         consultaSalva.setPaciente(paciente);
         consultaSalva.setMedico(medico);
