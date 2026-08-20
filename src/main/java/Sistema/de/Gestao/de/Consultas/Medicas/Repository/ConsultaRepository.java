@@ -6,11 +6,12 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Entidade.Medico;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
+public interface ConsultaRepository extends JpaRepository<Consulta, UUID> {
     boolean existsByMedicoAndDataHora(Medico medicoExiste, LocalDateTime localDateTime);
 
-    List<ConsultaResponseDTO> findByPaciente_IdPaciente(Long idPaciente);
+    List<Consulta> findByPaciente_IdPaciente(Long idPaciente);
 
-    List<ConsultaResponseDTO> findByMedico_IdMedico(Long idMedico);
+    List<Consulta> findByMedico_IdMedico(Long idMedico);
 }

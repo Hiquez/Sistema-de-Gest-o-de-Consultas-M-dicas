@@ -84,7 +84,7 @@ public class PacienteController {
         return ResponseEntity.status(HttpStatus.OK).body(pacienteService.atualizar(idPaciente, dto));
     }
 
-    @DeleteMapping("/ativar/{idPaciente}")
+    @PatchMapping("/ativar/{idPaciente}")
     @Operation(
             summary = "Ativar paciente",
             description = "Ativa o cadastro do paciente para permitir novas operações e atendimentos."
@@ -99,7 +99,7 @@ public class PacienteController {
         return ResponseEntity.status(HttpStatus.OK).body(pacienteService.ativarPaciente(idPaciente));
     }
 
-    @DeleteMapping("/inativar/{idPaciente}")
+    @PatchMapping("/inativar/{idPaciente}")
     @Operation(
             summary = "Inativar paciente",
             description = "Inativa o cadastro do paciente, bloqueando operações futuras relacionadas ao mesmo."

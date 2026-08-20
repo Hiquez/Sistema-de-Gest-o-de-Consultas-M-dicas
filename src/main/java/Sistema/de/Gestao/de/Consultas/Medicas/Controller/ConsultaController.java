@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/consultas")
@@ -51,7 +52,7 @@ public class ConsultaController {
     })
     public ResponseEntity<ConsultaResponseDTO> buscarPorId(
             @Parameter(description = "Identificador da consulta", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(consultaService.buscarConsultaPorId(id));
     }
 
@@ -90,7 +91,7 @@ public class ConsultaController {
     })
     public ResponseEntity<ConsultaResponseDTO> confirmar(
             @Parameter(description = "Identificador da consulta", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(consultaService.confirmarConsulta(id));
     }
 
@@ -105,7 +106,7 @@ public class ConsultaController {
     })
     public ResponseEntity<ConsultaResponseDTO> cancelar(
             @Parameter(description = "Identificador da consulta", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(consultaService.cancelarConsulta(id));
     }
 
@@ -120,7 +121,7 @@ public class ConsultaController {
     })
     public ResponseEntity<ConsultaResponseDTO> iniciarAtendimento(
             @Parameter(description = "Identificador da consulta", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(consultaService.iniciarAtendimento(id));
     }
 
@@ -135,7 +136,7 @@ public class ConsultaController {
     })
     public ResponseEntity<ConsultaResponseDTO> concluir(
             @Parameter(description = "Identificador da consulta", required = true)
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
         return ResponseEntity.ok(consultaService.concluirConsulta(id));
     }
 }

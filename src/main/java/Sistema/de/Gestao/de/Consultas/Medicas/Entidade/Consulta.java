@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -17,8 +18,9 @@ import java.time.LocalDateTime;
 public class Consulta {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idConsulta;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_consulta", nullable = false, updatable = false)
+    private UUID idConsulta;
     @ManyToOne
     @JoinColumn(name = "id_paciente", nullable = false)
     private Paciente paciente;

@@ -21,7 +21,9 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Repository.PacienteRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ConsultaService {
@@ -62,7 +64,7 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponseDTO confirmarConsulta(Long idConsulta) {
+    public ConsultaResponseDTO confirmarConsulta(UUID idConsulta) {
         Consulta consulta = buscarEntidadePorId(idConsulta);
 
         if (consulta.getStatus() != StatusConsulta.AGENDADA) {
@@ -85,7 +87,7 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponseDTO cancelarConsulta(Long idConsulta) {
+    public ConsultaResponseDTO cancelarConsulta(UUID idConsulta) {
         Consulta consulta = buscarEntidadePorId(idConsulta);
 
         boolean podeCancelar = consulta.getStatus() == StatusConsulta.CONFIRMADA
@@ -111,7 +113,7 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponseDTO iniciarAtendimento(Long idConsulta) {
+    public ConsultaResponseDTO iniciarAtendimento(UUID idConsulta) {
         Consulta consulta = buscarEntidadePorId(idConsulta);
 
         if (consulta.getStatus() != StatusConsulta.CONFIRMADA) {
@@ -119,14 +121,14 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.EM_ATENDIMENTO);
+
         return consultaMapper.toResponse(consulta);
     }
 
     @Transactional
-    public ConsultaResponseDTO concluirConsulta(Long idConsulta) {
+    public ConsultaResponseDTO concluirConsulta(UUID idConsulta) {
         Consulta consulta = buscarEntidadePorId(idConsulta);
 
-        // Só pode concluir se a consulta estiver em atendimento
         if (consulta.getStatus() != StatusConsulta.EM_ATENDIMENTO) {
             throw new ConsultaException("Consulta não pode ser concluída");
         }
@@ -147,36 +149,64 @@ public class ConsultaService {
     }
 
     @Transactional(readOnly = true)
-    public ConsultaResponseDTO buscarConsultaPorId(Long idConsulta) {
-        return consultaMapper.toResponse(buscarEntidadePorId(idConsulta));
+    public ConsultaResponseDTO buscarConsultaPorId(UUID idConsulta) {
+        return consultaMapper.toResponse(
+                buscarEntidadePorId(idConsulta)
+        );
     }
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorPaciente(Long idPaciente) {
-        return consultaRepository.findByPaciente_IdPaciente(idPaciente);
+        return consultaRepository
+                .findByPaciente_IdPaciente(idPaciente)
+                .stream()
+                .map(consultaMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultaPorMedico(Long idMedico) {
-        return consultaRepository.findByMedico_IdMedico(idMedico);
+        return consultaRepository
+                .findByMedico_IdMedico(idMedico)
+                .stream()
+                .map(consultaMapper::toResponse)
+                .toList();
     }
 
-    private Consulta validarAgendamentoConsulta(ConsultaRequestDTO consultaRequestDTO) {
-        Paciente pacienteExiste = pacienteRepository.findById(consultaRequestDTO.idPaciente())
-                .orElseThrow(() -> new PacienteException("Paciente não encontrado"));
+    private Consulta validarAgendamentoConsulta(
+            ConsultaRequestDTO consultaRequestDTO) {
 
-        Medico medicoExiste = medicoRepository.findById(consultaRequestDTO.idMedico())
-                .orElseThrow(() -> new MedicoException("Médico não encontrado"));
+        Paciente pacienteExiste = pacienteRepository
+                .findById(consultaRequestDTO.idPaciente())
+                .orElseThrow(() ->
+                        new PacienteException("Paciente não encontrado"));
 
-        if (consultaRepository.existsByMedicoAndDataHora(medicoExiste, consultaRequestDTO.dataHora())) {
+        Medico medicoExiste = medicoRepository
+                .findById(consultaRequestDTO.idMedico())
+                .orElseThrow(() ->
+                        new MedicoException("Médico não encontrado"));
+
+        if (consultaRepository.existsByMedicoAndDataHora(
+                medicoExiste,
+                consultaRequestDTO.dataHora())) {
+
             throw new HorarioException("Horário não disponível");
         }
 
-        return salvarConsulta(pacienteExiste, medicoExiste, consultaRequestDTO);
+        return salvarConsulta(
+                pacienteExiste,
+                medicoExiste,
+                consultaRequestDTO
+        );
     }
 
-    private Consulta salvarConsulta(Paciente paciente, Medico medico, ConsultaRequestDTO consultaRequestDTO) {
+    private Consulta salvarConsulta(
+            Paciente paciente,
+            Medico medico,
+            ConsultaRequestDTO consultaRequestDTO) {
+
         Consulta consulta = new Consulta();
+
         consulta.setPaciente(paciente);
         consulta.setMedico(medico);
         consulta.setDataHora(consultaRequestDTO.dataHora());
@@ -186,8 +216,9 @@ public class ConsultaService {
         return consultaRepository.save(consulta);
     }
 
-    private Consulta buscarEntidadePorId(Long idConsulta) {
+    private Consulta buscarEntidadePorId(UUID idConsulta) {
         return consultaRepository.findById(idConsulta)
-                .orElseThrow(() -> new ConsultaException("Consulta não encontrada"));
+                .orElseThrow(() ->
+                        new ConsultaException("Consulta não encontrada"));
     }
 }

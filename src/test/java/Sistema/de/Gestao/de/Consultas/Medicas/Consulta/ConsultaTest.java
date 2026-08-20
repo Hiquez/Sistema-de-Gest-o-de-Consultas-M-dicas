@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -44,11 +46,14 @@ public class ConsultaTest {
     @Mock
     private ConsultaMapper consultaMapper;
 
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @InjectMocks
     private ConsultaService consultaService;
 
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private final UUID idConsulta = UUID.randomUUID();
+    private final UUID idConsultaNaoEncontrada = UUID.randomUUID();
 
     private Paciente criarPacienteValido() {
         Paciente paciente = new Paciente();
@@ -63,11 +68,11 @@ public class ConsultaTest {
         return medico;
     }
 
-
     @Test
     public void testarAgendamentoConsulta() {
 
-        ConsultaRequestDTO consultaRequest = mock(ConsultaRequestDTO.class);
+        ConsultaRequestDTO consultaRequest =
+                mock(ConsultaRequestDTO.class);
 
         Paciente paciente = criarPacienteValido();
         Medico medico = criarMedicoValido();
@@ -117,14 +122,24 @@ public class ConsultaTest {
 
         assertEquals(consultaResponse, resultado);
 
-        verify(pacienteRepository).findById(1L);
-        verify(medicoRepository).findById(1L);
-        verify(consultaRepository)
-                .existsByMedicoAndDataHora(medico, dataHora);
-        verify(consultaRepository).save(any(Consulta.class));
-        verify(consultaMapper).toResponse(consultaSalva);
-    }
+        verify(pacienteRepository)
+                .findById(1L);
 
+        verify(medicoRepository)
+                .findById(1L);
+
+        verify(consultaRepository)
+                .existsByMedicoAndDataHora(
+                        medico,
+                        dataHora
+                );
+
+        verify(consultaRepository)
+                .save(any(Consulta.class));
+
+        verify(consultaMapper)
+                .toResponse(consultaSalva);
+    }
 
     @Test
     public void testarAgendamentoPacienteNaoEncontrado() {
@@ -143,12 +158,15 @@ public class ConsultaTest {
                 () -> consultaService.agendarConsulta(consultaRequest)
         );
 
-        verify(pacienteRepository).findById(1L);
+        verify(pacienteRepository)
+                .findById(1L);
 
-        verify(medicoRepository, never()).findById(any());
-        verify(consultaRepository, never()).save(any());
+        verify(medicoRepository, never())
+                .findById(any());
+
+        verify(consultaRepository, never())
+                .save(any());
     }
-
 
     @Test
     public void testarAgendamentoMedicoNaoEncontrado() {
@@ -175,12 +193,15 @@ public class ConsultaTest {
                 () -> consultaService.agendarConsulta(consultaRequest)
         );
 
-        verify(pacienteRepository).findById(1L);
-        verify(medicoRepository).findById(1L);
+        verify(pacienteRepository)
+                .findById(1L);
 
-        verify(consultaRepository, never()).save(any());
+        verify(medicoRepository)
+                .findById(1L);
+
+        verify(consultaRepository, never())
+                .save(any());
     }
-
 
     @Test
     public void testarHorarioIndisponivel() {
@@ -220,16 +241,20 @@ public class ConsultaTest {
         );
 
         verify(consultaRepository)
-                .existsByMedicoAndDataHora(medico, dataHora);
+                .existsByMedicoAndDataHora(
+                        medico,
+                        dataHora
+                );
 
-        verify(consultaRepository, never()).save(any());
+        verify(consultaRepository, never())
+                .save(any());
     }
-
 
     @Test
     public void testarConfirmarConsulta() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setPaciente(criarPacienteValido());
         consulta.setMedico(criarMedicoValido());
@@ -237,52 +262,59 @@ public class ConsultaTest {
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.confirmarConsulta(1L);
+                consultaService.confirmarConsulta(idConsulta);
 
         assertEquals(
                 StatusConsulta.CONFIRMADA,
                 consulta.getStatus()
         );
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaRepository).findById(1L);
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaRepository)
+                .findById(idConsulta);
+
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarConfirmarConsultaStatusInvalido() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.CANCELADA);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.confirmarConsulta(1L)
+                () -> consultaService.confirmarConsulta(idConsulta)
         );
 
-        verify(consultaRepository).findById(1L);
+        verify(consultaRepository)
+                .findById(idConsulta);
 
         verify(consultaMapper, never())
                 .toResponse(any());
     }
 
-
     @Test
     public void testarCancelarConsultaAgendada() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.AGENDADA);
         consulta.setPaciente(criarPacienteValido());
         consulta.setMedico(criarMedicoValido());
@@ -290,31 +322,37 @@ public class ConsultaTest {
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.cancelarConsulta(1L);
+                consultaService.cancelarConsulta(idConsulta);
 
         assertEquals(
                 StatusConsulta.CANCELADA,
                 consulta.getStatus()
         );
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaRepository).findById(1L);
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaRepository)
+                .findById(idConsulta);
+
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarCancelarConsultaConfirmada() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.CONFIRMADA);
         consulta.setPaciente(criarPacienteValido());
         consulta.setMedico(criarMedicoValido());
@@ -322,102 +360,114 @@ public class ConsultaTest {
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.cancelarConsulta(1L);
+                consultaService.cancelarConsulta(idConsulta);
 
         assertEquals(
                 StatusConsulta.CANCELADA,
                 consulta.getStatus()
         );
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarCancelarConsultaStatusInvalido() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.CONCLUIDA);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.cancelarConsulta(1L)
+                () -> consultaService.cancelarConsulta(idConsulta)
         );
 
-        verify(consultaRepository).findById(1L);
+        verify(consultaRepository)
+                .findById(idConsulta);
 
         verify(consultaMapper, never())
                 .toResponse(any());
     }
 
-
     @Test
     public void testarIniciarAtendimento() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.CONFIRMADA);
 
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.iniciarAtendimento(1L);
+                consultaService.iniciarAtendimento(idConsulta);
 
         assertEquals(
                 StatusConsulta.EM_ATENDIMENTO,
                 consulta.getStatus()
         );
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaRepository).findById(1L);
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaRepository)
+                .findById(idConsulta);
+
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarIniciarAtendimentoStatusInvalido() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.AGENDADA);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.iniciarAtendimento(1L)
+                () -> consultaService.iniciarAtendimento(idConsulta)
         );
 
-        verify(consultaRepository).findById(1L);
+        verify(consultaRepository)
+                .findById(idConsulta);
 
         verify(consultaMapper, never())
                 .toResponse(any());
     }
 
-
     @Test
     public void testarConcluirConsulta() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.EM_ATENDIMENTO);
         consulta.setPaciente(criarPacienteValido());
         consulta.setMedico(criarMedicoValido());
@@ -425,47 +475,53 @@ public class ConsultaTest {
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.concluirConsulta(1L);
+                consultaService.concluirConsulta(idConsulta);
 
         assertEquals(
                 StatusConsulta.CONCLUIDA,
                 consulta.getStatus()
         );
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaRepository).findById(1L);
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaRepository)
+                .findById(idConsulta);
+
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarConcluirConsultaStatusInvalido() {
 
         Consulta consulta = new Consulta();
+
         consulta.setStatus(StatusConsulta.CONFIRMADA);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.concluirConsulta(1L)
+                () -> consultaService.concluirConsulta(idConsulta)
         );
 
-        verify(consultaRepository).findById(1L);
+        verify(consultaRepository)
+                .findById(idConsulta);
 
         verify(consultaMapper, never())
                 .toResponse(any());
     }
-
 
     @Test
     public void testarBuscarConsultaPorId() {
@@ -475,65 +531,89 @@ public class ConsultaTest {
         ConsultaResponseDTO consultaResponse =
                 mock(ConsultaResponseDTO.class);
 
-        when(consultaRepository.findById(1L))
+        when(consultaRepository.findById(idConsulta))
                 .thenReturn(Optional.of(consulta));
 
         when(consultaMapper.toResponse(consulta))
                 .thenReturn(consultaResponse);
 
         ConsultaResponseDTO resultado =
-                consultaService.buscarConsultaPorId(1L);
+                consultaService.buscarConsultaPorId(idConsulta);
 
-        assertEquals(consultaResponse, resultado);
+        assertEquals(
+                consultaResponse,
+                resultado
+        );
 
-        verify(consultaRepository).findById(1L);
-        verify(consultaMapper).toResponse(consulta);
+        verify(consultaRepository)
+                .findById(idConsulta);
+
+        verify(consultaMapper)
+                .toResponse(consulta);
     }
-
 
     @Test
     public void testarConsultaNaoEncontrada() {
 
-        when(consultaRepository.findById(2L))
+        when(consultaRepository.findById(idConsultaNaoEncontrada))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.buscarConsultaPorId(2L)
+                () -> consultaService.buscarConsultaPorId(
+                        idConsultaNaoEncontrada
+                )
         );
 
-        verify(consultaRepository).findById(2L);
+        verify(consultaRepository)
+                .findById(idConsultaNaoEncontrada);
 
         verify(consultaMapper, never())
                 .toResponse(any());
     }
 
-
     @Test
     public void testarListarConsultaPorPaciente() {
 
-        ConsultaResponseDTO response1 =
-                mock(ConsultaResponseDTO.class);
+        Consulta consulta1 = mock(Consulta.class);
+        Consulta consulta2 = mock(Consulta.class);
 
-        ConsultaResponseDTO response2 =
-                mock(ConsultaResponseDTO.class);
+        ConsultaResponseDTO response1 = mock(ConsultaResponseDTO.class);
+        ConsultaResponseDTO response2 = mock(ConsultaResponseDTO.class);
 
-        List<ConsultaResponseDTO> consultas =
-                List.of(response1, response2);
+        List<Consulta> consultas = List.of(consulta1, consulta2);
 
         when(consultaRepository.findByPaciente_IdPaciente(1L))
                 .thenReturn(consultas);
 
+        when(consultaMapper.toResponse(consulta1))
+                .thenReturn(response1);
+
+        when(consultaMapper.toResponse(consulta2))
+                .thenReturn(response2);
+
         List<ConsultaResponseDTO> resultado =
                 consultaService.listarConsultaPorPaciente(1L);
 
-        assertEquals(2, resultado.size());
-        assertEquals(consultas, resultado);
+        assertEquals(
+                2,
+                resultado.size()
+        );
+
+        assertEquals(
+                List.of(response1, response2),
+                resultado
+        );
 
         verify(consultaRepository)
                 .findByPaciente_IdPaciente(1L);
-    }
 
+        verify(consultaMapper)
+                .toResponse(consulta1);
+
+        verify(consultaMapper)
+                .toResponse(consulta2);
+    }
 
     @Test
     public void testarListarConsultaPorPacienteVazio() {
@@ -550,9 +630,11 @@ public class ConsultaTest {
                 .findByPaciente_IdPaciente(1L);
     }
 
-
     @Test
     public void testarListarConsultaPorMedico() {
+
+        Consulta consulta1 = mock(Consulta.class);
+        Consulta consulta2 = mock(Consulta.class);
 
         ConsultaResponseDTO response1 =
                 mock(ConsultaResponseDTO.class);
@@ -560,22 +642,40 @@ public class ConsultaTest {
         ConsultaResponseDTO response2 =
                 mock(ConsultaResponseDTO.class);
 
-        List<ConsultaResponseDTO> consultas =
-                List.of(response1, response2);
+        List<Consulta> consultas =
+                List.of(consulta1, consulta2);
 
         when(consultaRepository.findByMedico_IdMedico(1L))
                 .thenReturn(consultas);
 
+        when(consultaMapper.toResponse(consulta1))
+                .thenReturn(response1);
+
+        when(consultaMapper.toResponse(consulta2))
+                .thenReturn(response2);
+
         List<ConsultaResponseDTO> resultado =
                 consultaService.listarConsultaPorMedico(1L);
 
-        assertEquals(2, resultado.size());
-        assertEquals(consultas, resultado);
+        assertEquals(
+                2,
+                resultado.size()
+        );
+
+        assertEquals(
+                List.of(response1, response2),
+                resultado
+        );
 
         verify(consultaRepository)
                 .findByMedico_IdMedico(1L);
-    }
 
+        verify(consultaMapper)
+                .toResponse(consulta1);
+
+        verify(consultaMapper)
+                .toResponse(consulta2);
+    }
 
     @Test
     public void testarListarConsultaPorMedicoVazio() {
@@ -592,63 +692,71 @@ public class ConsultaTest {
                 .findByMedico_IdMedico(1L);
     }
 
-
     @Test
     public void testarConfirmarConsultaNaoEncontrada() {
 
-        when(consultaRepository.findById(2L))
+        when(consultaRepository.findById(idConsultaNaoEncontrada))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.confirmarConsulta(2L)
+                () -> consultaService.confirmarConsulta(
+                        idConsultaNaoEncontrada
+                )
         );
 
-        verify(consultaRepository).findById(2L);
+        verify(consultaRepository)
+                .findById(idConsultaNaoEncontrada);
     }
-
 
     @Test
     public void testarCancelarConsultaNaoEncontrada() {
 
-        when(consultaRepository.findById(2L))
+        when(consultaRepository.findById(idConsultaNaoEncontrada))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.cancelarConsulta(2L)
+                () -> consultaService.cancelarConsulta(
+                        idConsultaNaoEncontrada
+                )
         );
 
-        verify(consultaRepository).findById(2L);
+        verify(consultaRepository)
+                .findById(idConsultaNaoEncontrada);
     }
-
 
     @Test
     public void testarIniciarAtendimentoNaoEncontrado() {
 
-        when(consultaRepository.findById(2L))
+        when(consultaRepository.findById(idConsultaNaoEncontrada))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.iniciarAtendimento(2L)
+                () -> consultaService.iniciarAtendimento(
+                        idConsultaNaoEncontrada
+                )
         );
 
-        verify(consultaRepository).findById(2L);
+        verify(consultaRepository)
+                .findById(idConsultaNaoEncontrada);
     }
-
 
     @Test
     public void testarConcluirConsultaNaoEncontrada() {
 
-        when(consultaRepository.findById(2L))
+        when(consultaRepository.findById(idConsultaNaoEncontrada))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ConsultaException.class,
-                () -> consultaService.concluirConsulta(2L)
+                () -> consultaService.concluirConsulta(
+                        idConsultaNaoEncontrada
+                )
         );
 
-        verify(consultaRepository).findById(2L);
+        verify(consultaRepository)
+                .findById(idConsultaNaoEncontrada);
     }
 }
