@@ -14,6 +14,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class ConsultaEventListener {
                     "SISTEMA_CONSULTAS",
                     "CONSULTA_AGENDADA",
                     objectMapper.writeValueAsString(event),
-                    event.idConsulta()
+                    UUID.randomUUID()
             );
 
             enviarEvento(eventoRequest);
@@ -62,7 +64,7 @@ public class ConsultaEventListener {
                     "SISTEMA_CONSULTAS",
                     "CONSULTA_CONFIRMADA",
                     objectMapper.writeValueAsString(event),
-                    event.idConsulta()
+                    UUID.randomUUID()
             );
 
             enviarEvento(eventoRequest);
@@ -92,7 +94,7 @@ public class ConsultaEventListener {
                     "SISTEMA_CONSULTAS",
                     "CONSULTA_CANCELADA",
                     objectMapper.writeValueAsString(event),
-                    event.idConsulta()
+                    UUID.randomUUID()
             );
 
             enviarEvento(eventoRequest);
@@ -122,7 +124,7 @@ public class ConsultaEventListener {
                     "SISTEMA_CONSULTAS",
                     "CONSULTA_CONCLUIDA",
                     objectMapper.writeValueAsString(event),
-                    event.idConsulta()
+                    UUID.randomUUID()
             );
 
             enviarEvento(eventoRequest);
