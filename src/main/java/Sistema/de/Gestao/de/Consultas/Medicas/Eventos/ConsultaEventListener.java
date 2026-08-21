@@ -5,6 +5,8 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.Consu
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaConcluidaEvent;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Consulta.Eventos.ConsultaConfirmadaEvent;
 import Sistema.de.Gestao.de.Consultas.Medicas.Domains.DTO.Evento.EventoRequest;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -144,8 +146,17 @@ public class ConsultaEventListener {
         }
     }
 
-    private void enviarEvento(EventoRequest eventoRequest) {
-
+    @Retry(name = "sistemaFluxos", fallbackMethod = "fallbackEnviarEvento")
+    @CircuitBreaker(name = "sistemaFluxos", fallbackMethod = "fallbackEnviarEvento")
+    public void enviarEvento(EventoRequest eventoRequest) {
+        // LIMITAÇÃO CONHECIDA: não há chave de idempotência real aqui (o eventId
+        // do sistema de fluxos é gerado aleatório a cada chamada, então retries
+        // não são reconhecidos como reenvio do mesmo evento). Em caso de timeout
+        // após a chamada já ter tido sucesso do lado do sistema de fluxos, o Retry
+        // pode gerar um envio duplicado (ex: e-mail enviado 2x para o paciente).
+        // Solução completa exigiria uma chave determinística (idConsulta + tipoEvento)
+        // reconhecida pelo sistema de fluxos, ou uma tabela de controle local
+        // (chave_idempotencia) — fica como próxima evolução, não implementada agora.
         webClient
                 .post()
                 .uri("http://localhost:8081/evento/receber")
@@ -153,5 +164,12 @@ public class ConsultaEventListener {
                 .retrieve()
                 .toBodilessEntity()
                 .block();
+    }
+
+    // Mesma assinatura de enviarEvento + Throwable no final.
+    // Só é chamado se as tentativas de Retry se esgotarem OU o circuito estiver aberto.
+    public void fallbackEnviarEvento(EventoRequest eventoRequest, Throwable t) {
+        log.warn("Sistema de fluxos indisponível após retries. Evento: {}",
+                eventoRequest.eventId(), t);
     }
 }

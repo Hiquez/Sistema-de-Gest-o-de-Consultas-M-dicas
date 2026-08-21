@@ -1,0 +1,19 @@
+resilience4j:
+  retry:
+    instances:
+      sistemaFluxos:
+        max-attempts: 3
+        wait-duration: 1s
+        # Reenvia só em falhas transitórias de rede — não adianta reenviar
+        # se o problema for de validação do payload, por exemplo
+        retry-exceptions:
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+
+  circuitbreaker:
+    instances:
+      sistemaFluxos:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
