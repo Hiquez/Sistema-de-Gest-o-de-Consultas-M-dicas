@@ -18,6 +18,7 @@ import Sistema.de.Gestao.de.Consultas.Medicas.Mapper.ConsultaMapper;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.ConsultaRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.MedicoRepository;
 import Sistema.de.Gestao.de.Consultas.Medicas.Repository.PacienteRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +34,20 @@ public class ConsultaService {
     private final MedicoRepository medicoRepository;
     private final ConsultaMapper consultaMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final MeterRegistry meterRegistry;
 
     public ConsultaService(ConsultaRepository consultaRepository,
                            PacienteRepository pacienteRepository,
                            MedicoRepository medicoRepository,
                            ConsultaMapper consultaMapper,
-                           ApplicationEventPublisher applicationEventPublisher) {
+                           ApplicationEventPublisher applicationEventPublisher,
+                           MeterRegistry meterRegistry) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
         this.medicoRepository = medicoRepository;
         this.consultaMapper = consultaMapper;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.meterRegistry = meterRegistry;
     }
 
     @Transactional
@@ -59,6 +63,8 @@ public class ConsultaService {
                         consulta.getDataHora()
                 )
         );
+
+        meterRegistry.counter("consultas.total.agendada", "status","AGENDADA").increment();
 
         return consultaMapper.toResponse(consulta);
     }
@@ -82,6 +88,8 @@ public class ConsultaService {
                         consulta.getDataHora()
                 )
         );
+
+        meterRegistry.counter("consultas.total.confirmada", "status","CONFIRMADA").increment();
 
         return consultaMapper.toResponse(consulta);
     }
@@ -109,6 +117,8 @@ public class ConsultaService {
                 )
         );
 
+        meterRegistry.counter("consultas.total.cancelada", "status","CANCELADA").increment();
+
         return consultaMapper.toResponse(consulta);
     }
 
@@ -121,6 +131,8 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.EM_ATENDIMENTO);
+
+        meterRegistry.counter("consultas.total.iniciadas", "status","EM_ATENDIMENTO").increment();
 
         return consultaMapper.toResponse(consulta);
     }
@@ -145,6 +157,7 @@ public class ConsultaService {
                 )
         );
 
+        meterRegistry.counter("consulta.total.concluida", "status","CONCLUIDA").increment();
         return consultaMapper.toResponse(consulta);
     }
 

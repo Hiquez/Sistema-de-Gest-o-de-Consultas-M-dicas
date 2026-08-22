@@ -27,7 +27,6 @@ public class Consulta {
     @ManyToOne
     @JoinColumn(name = "id_medico", nullable = false)
     private Medico medico;
-    @Future(message = "A data e hora da consulta deve ser uma data futura")
     private LocalDateTime dataHora;
     @Enumerated(EnumType.STRING)
     private StatusConsulta status;

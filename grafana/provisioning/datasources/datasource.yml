@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # "prometheus" é o nome do serviço no docker-compose — não localhost,
+    # não host.docker.internal, já que os dois estão na mesma rede
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true

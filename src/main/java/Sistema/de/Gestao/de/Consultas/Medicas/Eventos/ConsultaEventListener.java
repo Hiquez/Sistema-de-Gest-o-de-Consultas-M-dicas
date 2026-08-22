@@ -159,7 +159,7 @@ public class ConsultaEventListener {
         // (chave_idempotencia) — fica como próxima evolução, não implementada agora.
         webClient
                 .post()
-                .uri("http://localhost:8081/evento/receber")
+                .uri("http://host.docker.internal:8081/evento/receber")
                 .bodyValue(eventoRequest)
                 .retrieve()
                 .toBodilessEntity()
